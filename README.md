@@ -60,15 +60,12 @@ void lockAccountsWithTryLock() {
 
 The audit path also follows the safe order by locking the accounts first and `logLock` second. That removes the circular wait, so the program completes instead of freezing.
 
-## Why `trylock_gr5.cpp` is useful for presentation
-`trylock_gr5.cpp` is the demo version. It adds messages that show when a thread:
+## `trylock_gr5.cpp` Explanation
 
 - starts trying to lock the accounts,
 - acquires both locks,
 - releases both locks,
 - and prints the final balances.
-
-That extra output makes it easy to show the program is making progress and not deadlocking.
 
 ## Example output
 ```text

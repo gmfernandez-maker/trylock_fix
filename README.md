@@ -126,21 +126,17 @@ What the try-lock fix does:
 
 Result: no thread holds one resource while waiting for another; circular wait is removed and the program completes.
 
-Build & run
------------
-To compile and run the presentation-friendly example:
 
-```powershell
-g++ trylock_gr5.cpp -std=c++17 -pthread -o trylock_gr5.exe
-.\trylock_gr5.exe
-```
+About `trylock_gr5.cpp`
+-----------------------
+`trylock_gr5.cpp` is the version meant for presenting and explaining the fix in class. It keeps the same try-lock logic, but adds small status messages so you can see when a thread:
 
-To compile and run the minimal fixed copy:
+- starts trying to lock the accounts,
+- successfully acquires both account locks,
+- releases both account locks,
+- and prints the final balances after all threads finish.
 
-```powershell
-g++ original_trylock_fixed.cpp -std=c++17 -pthread -o original_trylock_fixed.exe
-.\original_trylock_fixed.exe
-```
+That extra output makes it easier to show that the program no longer freezes and that each thread completes its work in a safe order.
 
 Example output (trimmed)
 ------------------------
@@ -158,18 +154,3 @@ Released both account locks (thread 2)
 Final Balances: A=950, B=2050
 ```
 
-Notes & caveats
----------------
-- The try-lock loop used here uses `this_thread::yield()` between attempts; this is a simple approach but can still cause fairness issues or CPU usage under high contention.
-- `try_lock` removes hold-and-wait, but it does not guarantee starvation-freedom; in production code consider backoff, fairness strategies, or redesigning with strict lock ordering.
-- An alternative and often simpler fix is to enforce a global lock ordering for all paths that acquire multiple locks (e.g., `accountLock1` → `accountLock2` → `logLock`). That approach avoids retries and is typically more efficient.
-
-Files in this folder
---------------------
-- `mutex_strict_ordering.cpp` — strict ordering strategy (original `main.cpp` renamed)
-- `condition_variables.cpp` — serialized operations via a condition variable
-- `recursive_mutex.cpp` — single `recursive_mutex` protecting all critical sections
-- `try_lock.cpp`, `trylock_gr5.cpp`, `original_trylock_fixed.cpp` — variants using try-lock; `trylock_gr5.cpp` is the demo-friendly one
-- `shared_mutex.cpp` — read/write lock (shared_mutex) strategy
-
-If you want, I can also add a short slide or a one-page PDF comparing all five strategies and the trade-offs to include in your Canvas submission.

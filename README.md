@@ -32,23 +32,7 @@ What the try-lock fix does:
 - The helper `lockAccountsWithTryLock()` only returns once a thread holds both account locks simultaneously; if it cannot get both it releases any partial locks and retries. That removes the possibility of two transfer threads each holding one account lock while waiting for the other.
 - Equally important: `auditAccounts()` was reordered to acquire the account locks (using the same try-lock helper) before acquiring `logLock`. This prevents the audit thread from holding `logLock` while waiting for account locks — breaking the circular wait involving `logLock`.
 
-Result: no thread holds one resource while waiting for another; circular wait is removed and the program completes.
-
-Build & run
------------
-To compile and run the presentation-friendly example:
-
-```powershell
-g++ trylock_gr5.cpp -std=c++17 -pthread -o trylock_gr5.exe
-.\trylock_gr5.exe
-```
-
-To compile and run the minimal fixed copy:
-
-```powershell
-g++ original_trylock_fixed.cpp -std=c++17 -pthread -o original_trylock_fixed.exe
-.\original_trylock_fixed.exe
-```
+Result: no thread holds one resource while waiting for another, circular wait is removed and the program completes.
 
 Example output (trimmed)
 ------------------------
@@ -66,16 +50,6 @@ Released both account locks (thread 2)
 Final Balances: A=950, B=2050
 ```
 
-Notes & caveats
----------------
-- The try-lock loop used here uses `this_thread::yield()` between attempts; this is a simple approach but can still cause fairness issues or CPU usage under high contention.
-- `try_lock` removes hold-and-wait, but it does not guarantee starvation-freedom; in production code consider backoff, fairness strategies, or redesigning with strict lock ordering.
-- An alternative and often simpler fix is to enforce a global lock ordering for all paths that acquire multiple locks (e.g., `accountLock1` → `accountLock2` → `logLock`). That approach avoids retries and is typically more efficient.
-
-Files in this folder
---------------------
-- `mutex_strict_ordering.cpp` — strict ordering strategy (original `main.cpp` renamed)
-- `condition_variables.cpp` — serialized operations via a condition variable
 - `recursive_mutex.cpp` — single `recursive_mutex` protecting all critical sections
 - `try_lock.cpp`, `trylock_gr5.cpp`, `original_trylock_fixed.cpp` — variants using try-lock; `trylock_gr5.cpp` is the demo-friendly one
 - `shared_mutex.cpp` — read/write lock (shared_mutex) strategy

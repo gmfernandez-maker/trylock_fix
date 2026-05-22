@@ -5,7 +5,6 @@ Overview
 This project demonstrates several strategies to resolve a deadlock in a simple bank transfer example. Two files show the try-lock approach:
 
 - `trylock_gr5.cpp` — presentation-friendly try-lock variant with diagnostic output (acquire/release messages and final balances).
-- `original_trylock_fixed.cpp` — minimal patched copy of the original program where transfers and the audit use a try-lock helper and audit is reordered to acquire account locks before the log lock.
 
 What is `try_lock`?
 --------------------

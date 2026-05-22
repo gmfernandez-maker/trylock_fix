@@ -1,8 +1,5 @@
 # Deadlock Fixes — Try-Lock Example (Group5)
 
-## Overview
-This README focuses only on the original deadlocking program in `original.cpp` and the fixed version in `trylock_gr5.cpp`.
-
 ## What `try_lock` does
 `try_lock()` is a non-blocking mutex call. It tries to acquire a lock and immediately returns `true` or `false`.
 

@@ -66,11 +66,26 @@ The audit path also follows the safe order by locking the accounts first and `lo
 
 ## Example output
 ```text
-Thread A: trying to lock accounts
 Thread B: trying to lock accounts
-Acquired both account locks (thread ...)
+Acquired both account locks (thread 4)
+Audit: locking log
+Audit Report: A=1000, B=2000
+Released both account locks (thread 4)
+Acquired both account locks (thread 2)
+Thread A: transferred money
+Released both account locks (thread 2)
+Acquired both account locks (thread 3)
 Thread B: transferred money
-Released both account locks (thread ...)
+Released both account locks (thread 3)
 Final Balances: A=950, B=2050
 ```
+
+- `Thread B: trying to lock accounts` means one transfer started first and entered the try-lock loop.
+- `Acquired both account locks (thread 4)` means that thread successfully got both account mutexes at the same time.
+- `Audit: locking log` means the audit thread moved on to the log mutex after the account locks were available.
+- `Audit Report: A=1000, B=2000` means the audit ran before either transfer changed the balances, so it read the starting values.
+- `Released both account locks (thread 4)` means that thread finished its critical section and unlocked both accounts.
+- `Acquired both account locks (thread 2)` and `Thread A: transferred money` mean the A transfer ran next and updated the balances safely.
+- `Acquired both account locks (thread 3)` and `Thread B: transferred money` mean the B transfer ran after that and also completed safely.
+- `Final Balances: A=950, B=2050` confirms both transfers were applied and the program ended without deadlock.
 
